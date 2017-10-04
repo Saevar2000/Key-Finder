@@ -9,6 +9,12 @@ namespace Key_Finder
     {
         public bool ValidatePrivateKey(string privateKey)
         {
+            if (Regex.IsMatch(privateKey, @"\s"))
+            {
+                Console.WriteLine("String includes a space, not a valid private key");
+                return false;
+            }
+
             if (Regex.IsMatch(privateKey, "5[HJK][1-9A-HJ-NP-Za-km-z]{49}"))
             {
                 Console.WriteLine("private key is uncompressed");
@@ -19,11 +25,9 @@ namespace Key_Finder
                 Console.WriteLine("private key is compressed");
                 return true;
             }
-            else
-            {
-                Console.WriteLine("Invalid private key");
-                return false;
-            }
+            
+            Console.WriteLine("Invalid private key");
+            return false;
         }
 
         public bool ValidateBitcoinAddress(string address)
