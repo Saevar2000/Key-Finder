@@ -15,13 +15,11 @@ namespace Crawler
 
         static void Main(string[] args)
         {
-            WriteContents writeContents = new WriteContents();
+            ParseWebsite parseWebsite = new ParseWebsite();
             string url = "https://pastebin.com/XQWEefvc/";
-            writeContents.Write(url);
+            parseWebsite.Parse(url);
 
-
-
-            Console.ReadKey();
+            Console.ReadLine();
         }
     }
 }
