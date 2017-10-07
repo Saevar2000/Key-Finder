@@ -16,10 +16,10 @@ namespace Crawler
         static void Main(string[] args)
         {
             ParseWebsite parseWebsite = new ParseWebsite();
-            string url = "https://pastebin.com/XQWEefvc/";
+            string url = "https://pastebin.com/LxBhVLPM";
             parseWebsite.Parse(url);
 
-            Console.ReadLine();
+            Console.ReadKey();
         }
     }
 }

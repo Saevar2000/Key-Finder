@@ -18,6 +18,7 @@ namespace Key_Finder
             // 5HpHagT65TZzG1PH3CSu63k8DbpvD8s5ip4nEB3kEsreAnchuDf -> 1EHNa6Q4Jz2uvNExL497mE43ikXhwF6kZm
             //string privateKey = "tada 5HpHagT65TZzG1PH3CSu63k8DbpvD8s5ip4nEB3kEsreAnchuDf";
 
+
             Validator validator = new Validator();
             foreach (string privateKey in words)
             {

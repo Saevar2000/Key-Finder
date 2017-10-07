@@ -13,9 +13,10 @@ namespace Crawler
     {
         public void Parse(string url)
         {
+            string uniqueFileName = $@"{Guid.NewGuid()}.txt";
             try
             {
-                TextWriter tw = new StreamWriter("test-" + DateTime.Now.Ticks + ".txt ", true);
+                
                 var data = new MyWebClient().DownloadString(url);
                 var doc = new HtmlDocument();
                 doc.LoadHtml(data);
@@ -25,20 +26,56 @@ namespace Crawler
                 .ToList()
                 .ForEach(n => n.Remove());
 
-                foreach (var node in doc.DocumentNode.SelectNodes("//text()"))
+                using (TextWriter tw = new StreamWriter(uniqueFileName))
                 {
-                    if (!string.IsNullOrWhiteSpace(node.InnerText))
+                    foreach (var node in doc.DocumentNode.SelectNodes("//text()"))
                     {
-                        tw.WriteLine(node.InnerText);
-                        Console.WriteLine(node.InnerText);
+                        if (!string.IsNullOrWhiteSpace(node.InnerText))
+                        {
+                            if (node.InnerText.Length > 48)
+                            {
+                                tw.WriteLine(node.InnerText.Trim());
+                                
+                            }
+                        }
                     }
                 }
+                
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
             }
 
+            var tempFileName = Path.GetTempFileName();
+            try
+            {
+                using (var streamReader = new StreamReader(uniqueFileName))
+                using (var streamWriter = new StreamWriter(tempFileName))
+                {
+                    string line;
+                    while ((line = streamReader.ReadLine()) != null)
+                    {
+                        if (!string.IsNullOrWhiteSpace(line))
+                        {
+                            string[] words = line.Split(' ');
+                            foreach (string word in words)
+                            {
+                                if (word.Length > 48)
+                                {
+                                    streamWriter.WriteLine(word);
+                                    Console.WriteLine(word);
+                                }
+                            }
+                        }
+                    }
+                }
+                File.Copy(tempFileName, uniqueFileName, true);
+            }
+            finally
+            {
+                File.Delete(tempFileName);
+            }
         }
     }
 }
