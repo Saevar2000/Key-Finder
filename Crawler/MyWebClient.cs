@@ -9,6 +9,7 @@ namespace Crawler
         {
             HttpWebRequest request = base.GetWebRequest(address) as HttpWebRequest;
             request.AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip;
+            request.Timeout = 5000;
             return request;
         }
     }

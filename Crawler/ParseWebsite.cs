@@ -11,24 +11,32 @@ namespace Crawler
 {
     class ParseWebsite
     {
-        public void Parse(string url)
+        public void Parse(string link)
         {
-            string uniqueFileName = $@"{Guid.NewGuid()}.txt";
             try
             {
-                
-                var data = new MyWebClient().DownloadString(url);
-                var doc = new HtmlDocument();
-                doc.LoadHtml(data);
+                Directory.CreateDirectory("Scan-Me");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.StackTrace);
+            }
 
-                doc.DocumentNode.Descendants()
+            string uniqueFileName = $@"Scan-Me/{Guid.NewGuid()}.txt";
+            try
+            {
+                var data = new MyWebClient().DownloadString(link);
+                var document = new HtmlDocument();
+                document.LoadHtml(data);
+
+                document.DocumentNode.Descendants()
                 .Where(n => n.Name == "script" || n.Name == "style" || n.Name == "#comment")
                 .ToList()
                 .ForEach(n => n.Remove());
 
                 using (TextWriter tw = new StreamWriter(uniqueFileName))
                 {
-                    foreach (var node in doc.DocumentNode.SelectNodes("//text()"))
+                    foreach (var node in document.DocumentNode.SelectNodes("//text()"))
                     {
                         if (!string.IsNullOrWhiteSpace(node.InnerText))
                         {
@@ -44,7 +52,7 @@ namespace Crawler
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                Console.WriteLine(e.StackTrace);
             }
 
             var tempFileName = Path.GetTempFileName();
