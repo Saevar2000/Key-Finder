@@ -22,7 +22,7 @@ namespace Crawler
             string startingURL = "https://pastebin.com/LxBhVLPM";
 
             // Manually parse startingURL so it doesn't get skipped
-            //parseWebsite.Parse(startingURL);
+            parseWebsite.Parse(startingURL);
 
             // Start crawling from startingURL and parse everything from there
             CrawlAndParse(startingURL);

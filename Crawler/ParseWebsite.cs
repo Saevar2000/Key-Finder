@@ -13,6 +13,8 @@ namespace Crawler
     {
         public void Parse(string link)
         {
+            List<string> found = new List<string>();
+
             try
             {
                 Directory.CreateDirectory("Scan-Me");
@@ -42,8 +44,7 @@ namespace Crawler
                         {
                             if (node.InnerText.Length > 48)
                             {
-                                tw.WriteLine(node.InnerText.Trim());
-                                
+                                tw.WriteLine(node.InnerText.Trim());   
                             }
                         }
                     }
@@ -71,14 +72,25 @@ namespace Crawler
                             {
                                 if (word.Length > 48)
                                 {
-                                    streamWriter.WriteLine(word);
-                                    Console.WriteLine(word);
+                                    if (!found.Contains(word)) // Prevent duplicates in current document
+                                    {
+                                        found.Add(word);
+                                        streamWriter.WriteLine(word);
+                                        Console.WriteLine(word);
+                                    }
                                 }
                             }
                         }
                     }
                 }
                 File.Copy(tempFileName, uniqueFileName, true);
+
+                // Delete file if nothing is written to it
+                FileInfo f = new FileInfo(uniqueFileName);
+                if (f.Length == 0)
+                {
+                    f.Delete();
+                }
             }
             finally
             {
