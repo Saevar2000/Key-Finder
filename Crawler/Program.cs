@@ -62,7 +62,7 @@ namespace Crawler
 
                             Console.WriteLine($"Scanning: {link2}");
                             parseWebsite.Parse(link2);
-                            CrawlAndParse(link2); // Reeeeeecuuursssiioonn
+                            CrawlAndParse(link2); 
 
                             Console.WriteLine("Waiting 3 seconds");
                             Thread.Sleep(3000);
@@ -70,11 +70,17 @@ namespace Crawler
                     }
                     else
                     {
-                        // Need to fix this later, it is not supposed to skip all of this
-                        Console.WriteLine($"{link2} is not a direct link, skipping");
+                        if (scannedList.Contains(link2))
+                        {
+                            Console.WriteLine($"Already scanned: {url}{link2}");
+                        }
+                        else
+                        {
+                            Console.WriteLine($"Scanning: {url}{link2}");
+                            CrawlAndParse(url + link2);
+                        }
                     }
                 }
-
             }
         }
     }
