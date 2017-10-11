@@ -5,15 +5,63 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Crawler
 {
     class ParseWebsite
     {
-        public void Parse(string link)
+
+        // Downloads the website
+        public HtmlDocument DownloadSite(string url)
         {
-            List<string> found = new List<string>();
+            string data = new MyWebClient().DownloadString(url);
+            HtmlDocument document = new HtmlDocument();
+            document.LoadHtml(data);
+
+            if (data == "Please refresh the page to continue...")
+            {
+                Console.WriteLine("Timed out, sleeping for 5 seconds and trying again");
+                Thread.Sleep(5000);
+                DownloadSite(url);
+            }
+
+            return document;
+        }
+
+        public List<string> GetLinks(HtmlDocument document)
+        {
+            List<string> validLinks = new List<string>();
+
+            foreach (HtmlNode link in document.DocumentNode.SelectNodes("//a[@href]"))
+            {
+                HtmlAttribute att = link.Attributes["href"];
+                foreach (var link2 in att.Value.Split(' '))
+                {
+                    if (validLinks.Contains(link2))
+                    {
+                        if (link2.StartsWith("http"))
+                        {
+                            validLinks.Add(link2);
+                            Console.WriteLine(link2);
+                        }
+                        else
+                        {
+                            // TODO: make this url + link2
+                            validLinks.Add(link2);
+                            Console.WriteLine(link2);
+                        }
+                    }
+                }
+            }
+
+            return validLinks;
+        }
+
+        public List<string> GetKeys(HtmlDocument document)
+        {
+            List<string> possibleKeys = new List<string>();
 
             try
             {
@@ -25,12 +73,9 @@ namespace Crawler
             }
 
             string uniqueFileName = $@"Scan-Me/{Guid.NewGuid()}.txt";
-            try
-            {
-                var data = new MyWebClient().DownloadString(link);
-                var document = new HtmlDocument();
-                document.LoadHtml(data);
 
+            try
+            {   
                 document.DocumentNode.Descendants()
                 .Where(n => n.Name == "script" || n.Name == "style" || n.Name == "#comment")
                 .ToList()
@@ -42,9 +87,9 @@ namespace Crawler
                     {
                         if (!string.IsNullOrWhiteSpace(node.InnerText))
                         {
-                            if (node.InnerText.Length > 48)
+                            if (node.InnerText.Length > 48) // All keys are bigger than 48
                             {
-                                tw.WriteLine(node.InnerText.Trim());   
+                                tw.WriteLine(node.InnerText.Trim());
                             }
                         }
                     }
@@ -72,9 +117,9 @@ namespace Crawler
                             {
                                 if (word.Length > 48)
                                 {
-                                    if (!found.Contains(word)) // Prevent duplicates in current document
+                                    if (!possibleKeys.Contains(word)) // Prevent duplicates in current document
                                     {
-                                        found.Add(word);
+                                        possibleKeys.Add(word);
                                         streamWriter.WriteLine(word);
                                         Console.WriteLine(word);
                                     }
@@ -96,6 +141,8 @@ namespace Crawler
             {
                 File.Delete(tempFileName);
             }
+
+            return possibleKeys;
         }
     }
 }
