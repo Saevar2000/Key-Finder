@@ -17,28 +17,32 @@ namespace Crawl
 
             toBeScanned.AddRange(c.Parse("https://pastebin.com/LxBhVLPM"));
 
-            for (int i = 0; i < toBeScanned.Count; i++)
+            while(!Console.KeyAvailable)
             {
-                // Prevent duplicates
-                toBeScanned.RemoveAll(item => alreadyScanned.Contains(item));
-
-                Console.WriteLine(toBeScanned.ElementAt(i));
-                try
+                for (int i = 0; i < toBeScanned.Count; i++)
                 {
-                    // Throws exception when it gets null, needs to be looked at,
-                    // this does not need to be in a try
-                    toBeScanned.AddRange(c.Parse(toBeScanned.ElementAt(i)));
-                }
-                catch (Exception e)
-                {
-                    //Console.WriteLine(e.StackTrace);
-                }
+                    // Prevent duplicates
+                    toBeScanned.RemoveAll(item => alreadyScanned.Contains(item));
 
-                toBeScanned.RemoveAt(i);
+                    Console.WriteLine(toBeScanned.ElementAt(i));
+                    try
+                    {
+                        // Throws exception when it gets null, needs to be looked at,
+                        // this does not need to be in a try
+                        toBeScanned.AddRange(c.Parse(toBeScanned.ElementAt(i)));
+                    }
+                    catch (Exception e)
+                    {
+                        //Console.WriteLine(e.StackTrace);
+                    }
 
-                Console.WriteLine("toBeScanned: " + toBeScanned.Count);
-                Console.WriteLine("i: " + i);
+                    toBeScanned.RemoveAt(i);
+
+                    Console.WriteLine("toBeScanned: " + toBeScanned.Count);
+                    Console.WriteLine("pages scraped: " + i);
+                }
             }
+            
 
             Console.WriteLine("Done");
             Console.ReadLine();
