@@ -3,64 +3,29 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading;
-using System.Threading.Tasks;
 
-namespace Crawler
+namespace Crawl
 {
-    class ParseWebsite
+    class CrawlParse
     {
+        Validator validator = new Validator();
 
-        // Downloads the website
-        public HtmlDocument DownloadSite(string url)
+        public List<string> Parse(string url)
         {
+            var baseUrl = new Uri(url);
+
             string data = new MyWebClient().DownloadString(url);
             HtmlDocument document = new HtmlDocument();
+
             document.LoadHtml(data);
 
             if (data == "Please refresh the page to continue...")
             {
-                Console.WriteLine("Timed out, sleeping for 5 seconds and trying again");
-                Thread.Sleep(5000);
-                DownloadSite(url);
+                Console.WriteLine("rip");
+                //return null;
             }
 
-            return document;
-        }
-
-        public List<string> GetLinks(HtmlDocument document)
-        {
-            List<string> validLinks = new List<string>();
-
-            foreach (HtmlNode link in document.DocumentNode.SelectNodes("//a[@href]"))
-            {
-                HtmlAttribute att = link.Attributes["href"];
-                foreach (var link2 in att.Value.Split(' '))
-                {
-                    if (validLinks.Contains(link2))
-                    {
-                        if (link2.StartsWith("http"))
-                        {
-                            validLinks.Add(link2);
-                            Console.WriteLine(link2);
-                        }
-                        else
-                        {
-                            // TODO: make this url + link2
-                            validLinks.Add(link2);
-                            Console.WriteLine(link2);
-                        }
-                    }
-                }
-            }
-
-            return validLinks;
-        }
-
-        public List<string> GetKeys(HtmlDocument document)
-        {
+            // Get Keys
             List<string> possibleKeys = new List<string>();
 
             try
@@ -75,7 +40,7 @@ namespace Crawler
             string uniqueFileName = $@"Scan-Me/{Guid.NewGuid()}.txt";
 
             try
-            {   
+            {
                 document.DocumentNode.Descendants()
                 .Where(n => n.Name == "script" || n.Name == "style" || n.Name == "#comment")
                 .ToList()
@@ -94,7 +59,7 @@ namespace Crawler
                         }
                     }
                 }
-                
+
             }
             catch (Exception e)
             {
@@ -119,9 +84,12 @@ namespace Crawler
                                 {
                                     if (!possibleKeys.Contains(word)) // Prevent duplicates in current document
                                     {
-                                        possibleKeys.Add(word);
-                                        streamWriter.WriteLine(word);
-                                        Console.WriteLine(word);
+                                        if (validator.ValidatePrivateKey(word))
+                                        {
+                                            possibleKeys.Add(word);
+                                            streamWriter.WriteLine(word);
+                                            Console.WriteLine(word);
+                                        }
                                     }
                                 }
                             }
@@ -142,7 +110,40 @@ namespace Crawler
                 File.Delete(tempFileName);
             }
 
-            return possibleKeys;
+            // Prevent crash if site doesn't contain a link
+            if (document.DocumentNode.SelectNodes("//a[@href]") == null)
+            {
+                Console.WriteLine("Site doesn't contain a link");
+                return null;
+            }
+
+            // Get links
+            List<string> links = new List<string>();
+
+            foreach (var node in document.DocumentNode.SelectNodes("//a[@href]"))
+            {
+                HtmlAttribute att = node.Attributes["href"];
+                foreach (var link2 in att.Value.Split(' '))
+                {
+                    if (!links.Contains(link2))
+                    {
+                        if (link2.StartsWith("http"))
+                        {
+                            Uri finalURL = new Uri(baseUrl, link2); 
+                            // Console.WriteLine(finalURL);
+                            links.Add(finalURL.ToString());
+                        }
+                        else
+                        {
+                            Uri finalURL = new Uri(baseUrl, link2);
+                            // Console.WriteLine(finalURL);
+                            links.Add(finalURL.ToString());
+                        }
+                    }
+                }
+            }
+
+            return links;
         }
     }
 }

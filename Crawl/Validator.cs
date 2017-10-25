@@ -3,7 +3,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 
-namespace Key_Finder
+namespace Crawl
 {
     class Validator
     {
@@ -11,22 +11,22 @@ namespace Key_Finder
         {
             if (Regex.IsMatch(privateKey, @"\s"))
             {
-                Console.WriteLine("String includes a space, not a valid private key");
+                //Console.WriteLine("String includes a space, not a valid private key");
                 return false;
             }
 
             if (Regex.IsMatch(privateKey, "5[HJK][1-9A-HJ-NP-Za-km-z]{49}"))
             {
-                Console.WriteLine("private key is uncompressed");
+                //Console.WriteLine("private key is uncompressed");
                 return true;
             }
             else if (Regex.IsMatch(privateKey, "[KL][1-9A-HJ-NP-Za-km-z]{51}"))
             {
-                Console.WriteLine("private key is compressed");
+                //Console.WriteLine("private key is compressed");
                 return true;
             }
-            
-            Console.WriteLine("Invalid private key");
+
+            //Console.WriteLine("Invalid private key");
             return false;
         }
 
