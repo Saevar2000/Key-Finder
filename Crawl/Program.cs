@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Npgsql;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,6 +11,31 @@ namespace Crawl
     {
         static void Main(string[] args)
         {
+            var connString = "Host=127.0.0.1;Username=user;Password=pass;Database=db";
+
+            using (var conn = new NpgsqlConnection(connString))
+            {
+                conn.Open();
+
+                // Insert some data
+                using (var cmd = new NpgsqlCommand())
+                {
+                    cmd.Connection = conn;
+                    cmd.CommandText = "INSERT INTO data (some_field) VALUES (@p)";
+                    cmd.Parameters.AddWithValue("p", "Hello world");
+                    cmd.ExecuteNonQuery();
+                }
+
+                // Retrieve all rows
+                using (var cmd = new NpgsqlCommand("SELECT some_field FROM data", conn))
+                using (var reader = cmd.ExecuteReader())
+                    while (reader.Read())
+                        Console.WriteLine(reader.GetString(0));
+            }
+
+            Console.WriteLine("test");
+            Console.ReadLine();
+
             CrawlParse c = new CrawlParse();
 
             List<string> alreadyScanned = new List<string>();
@@ -17,8 +43,6 @@ namespace Crawl
 
             toBeScanned.AddRange(c.Parse("https://pastebin.com/LxBhVLPM"));
 
-            while(!Console.KeyAvailable)
-            {
                 for (int i = 0; i < toBeScanned.Count; i++)
                 {
                     // Prevent duplicates
@@ -27,8 +51,6 @@ namespace Crawl
                     Console.WriteLine(toBeScanned.ElementAt(i));
                     try
                     {
-                        // Throws exception when it gets null, needs to be looked at,
-                        // this does not need to be in a try
                         toBeScanned.AddRange(c.Parse(toBeScanned.ElementAt(i)));
                     }
                     catch (Exception e)
@@ -41,7 +63,6 @@ namespace Crawl
                     Console.WriteLine("toBeScanned: " + toBeScanned.Count);
                     Console.WriteLine("pages scraped: " + i);
                 }
-            }
             
 
             Console.WriteLine("Done");
